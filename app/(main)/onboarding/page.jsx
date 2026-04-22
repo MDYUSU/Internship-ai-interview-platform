@@ -25,11 +25,12 @@ export default function OnboardingPage() {
     categories: [],
   });
 
-  useEffect(() => {
-    if (data && !loading) {
-      router.push(role === "INTERVIEWER" ? "/dashboard" : "/explore");
-    }
-  }, [data, router]);
+useEffect(() => {
+  if (data?.success && !loading) {
+    // Using window.location forces the app to refresh and see your NEW role
+    window.location.href = role === "INTERVIEWER" ? "/dashboard" : "/explore";
+  }
+}, [data, loading, role]);
 
   const toggleCategory = (val) => {
     setForm((prev) => ({

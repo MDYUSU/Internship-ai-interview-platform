@@ -30,7 +30,7 @@ export const completeOnboarding = async (data) => {
         ...(role === "INTERVIEWER" && {
           title,
           company,
-          yearsExp,
+          yearsExp: parseInt(yearsExp),
           bio,
           categories,
         }),

@@ -1,16 +1,12 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../lib/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
+ 
 }
-
-// ─── ENUMS ───────────────────────────────────────────────
 
 enum UserRole {
   UNASSIGNED
@@ -60,40 +56,32 @@ enum TransactionType {
   ADMIN_ADJUSTMENT
 }
 
-// ─── USER ────────────────────────────────────────────────
-
 model User {
-  id          String   @id @default(uuid())
-  clerkUserId String   @unique
-  email       String   @unique
-  name        String?
-  imageUrl    String?
-  role        UserRole @default(UNASSIGNED)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // interviewee-only
+  id                     String    @id @default(uuid())
+  clerkUserId            String    @unique
+  email                  String    @unique
+  name                   String?
+  imageUrl               String?
+  role                   UserRole  @default(UNASSIGNED)
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
   credits                Int       @default(0)
   currentPlan            String    @default("free")
   creditsLastAllocatedAt DateTime?
+  bio                    String?
+  title                  String?
+  company                String?
+  yearsExp               Int?
+  categories             InterviewCategory[]
+  creditRate             Int       @default(1)
+  creditBalance          Int       @default(0)
 
-  // interviewer-only
-  bio           String?
-  title         String?
-  company       String?
-  yearsExp      Int?
-  categories    InterviewCategory[]
-  creditRate    Int                 @default(1)
-  creditBalance Int                 @default(0)
-
-  availabilities        Availability[]
-  bookingsAsInterviewee Booking[]           @relation("IntervieweeBookings")
-  bookingsAsInterviewer Booking[]           @relation("InterviewerBookings")
-  transactions          CreditTransaction[]
-  payouts               Payout[]
+  availabilities         Availability[]
+  bookingsAsInterviewee  Booking[]           @relation("IntervieweeBookings")
+  bookingsAsInterviewer  Booking[]           @relation("InterviewerBookings")
+  transactions           CreditTransaction[]
+  payouts                Payout[]
 }
-
-// ─── AVAILABILITY ────────────────────────────────────────
 
 model Availability {
   id            String             @id @default(uuid())
@@ -106,14 +94,12 @@ model Availability {
   @@index([interviewerId, startTime])
 }
 
-// ─── BOOKINGS ────────────────────────────────────────────
-
 model Booking {
   id             String        @id @default(uuid())
   intervieweeId  String
-  interviewee    User          @relation("IntervieweeBookings", fields: [intervieweeId], references: [id])
+  interviewee    User          @relation("IntervieweeBookings", fields: [intervieweeId], references: [id], onDelete: Cascade)
   interviewerId  String
-  interviewer    User          @relation("InterviewerBookings", fields: [interviewerId], references: [id])
+  interviewer    User          @relation("InterviewerBookings", fields: [interviewerId], references: [id], onDelete: Cascade)
   startTime      DateTime
   endTime        DateTime
   status         BookingStatus @default(SCHEDULED)
@@ -129,8 +115,6 @@ model Booking {
   @@index([interviewerId, status])
   @@index([intervieweeId, status])
 }
-
-// ─── FEEDBACK ────────────────────────────────────────────
 
 model Feedback {
   id             String         @id @default(uuid())
@@ -149,8 +133,6 @@ model Feedback {
   createdAt      DateTime       @default(now())
 }
 
-// ─── CREDIT TRANSACTIONS ─────────────────────────────────
-
 model CreditTransaction {
   id        String          @id @default(uuid())
   userId    String
@@ -158,11 +140,9 @@ model CreditTransaction {
   amount    Int
   type      TransactionType
   bookingId String?
-  booking   Booking?        @relation(fields: [bookingId], references: [id])
+  booking   Booking?        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   createdAt DateTime        @default(now())
 }
-
-// ─── PAYOUTS ─────────────────────────────────────────────
 
 model Payout {
   id            String       @id @default(uuid())

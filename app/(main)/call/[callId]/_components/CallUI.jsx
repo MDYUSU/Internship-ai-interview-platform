@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback, useState } from "react";
+import { generateAndSaveFeedback } from "@/actions/call";
 
 // Stream Video
 import {
@@ -44,21 +45,7 @@ export default function CallUI({
   const callingState = useCallCallingState();
 
   const [activeTab, setActiveTab] = useState("chat");
-
-  // Auto-stop recording before leaving
-  const handleLeave = useCallback(async () => {
-    try {
-      if (call) {
-        const isRecording = call.state?.recording;
-        if (isRecording) {
-          await call.stopRecording().catch(() => {});
-        }
-        await call.leave().catch(() => {});
-      }
-    } finally {
-      onLeave();
-    }
-  }, [call, onLeave]);
+  const [isEndingCall, setIsEndingCall] = useState(false);
 
   // ── Chat client — same token works for both Video + Chat SDKs ──
   const chatClient = useCreateChatClient({
@@ -72,6 +59,45 @@ export default function CallUI({
   });
 
   const [chatChannel, setChatChannel] = useState(null);
+
+  // Auto-stop recording before leaving
+  const handleLeave = useCallback(async () => {
+    if (isEndingCall) return;
+    setIsEndingCall(true);
+    
+    console.log("Attempting to end call for booking ID:", booking?.id);
+
+    try {
+      if (call) {
+        const isRecording = call.state?.recording;
+        if (isRecording) {
+          await call.stopRecording().catch(() => {});
+        }
+        
+        // Get transcript from chat messages
+      let transcript = "";
+        if (chatChannel && chatChannel.state && chatChannel.state.messages) {
+          transcript = chatChannel.state.messages
+            .map(msg => `${msg.user?.name || 'Unknown'}: ${msg.text}`)
+            .join('\n');
+        }
+
+        // ALWAYS execute this, even if transcript is empty, so status updates to COMPLETED
+        if (booking?.id) {
+          console.log("Sending to server. Transcript length:", transcript.length);
+          await generateAndSaveFeedback(booking.id, transcript);
+        } else {
+          console.error("No booking ID found in frontend!");
+        }
+
+        await call.leave().catch(() => {});
+      }
+    } catch (error) {
+      console.error("Error ending call:", error);
+    } finally {
+      onLeave();
+    }
+  }, [isEndingCall, call, onLeave, chatChannel, booking?.id]);
 
   useEffect(() => {
     if (!chatClient) return;
@@ -132,7 +158,7 @@ export default function CallUI({
         <div className="flex flex-col flex-1 min-w-0">
           <StreamTheme>
             <SpeakerLayout participantBarPosition="bottom" />
-            <CallControls onLeave={handleLeave} />
+            <CallControls onLeave={handleLeave} disabled={isEndingCall} />
           </StreamTheme>
         </div>
 

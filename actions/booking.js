@@ -7,13 +7,31 @@ import { revalidatePath } from "next/cache";
 import { request } from "@arcjet/next";
 import { createRateLimiter, checkRateLimit } from "@/lib/arcjet";
 
-// 5 booking attempts per hour — generous enough for real users,
-// tight enough to block automated abuse
 const bookingLimiter = createRateLimiter({
   refillRate: 2,
   interval: "1h",
   capacity: 5,
 });
+
+export const updateBookingStatus = async (bookingId, status) => {
+  const user = await currentUser();
+  if (!user) throw new Error("Unauthorized");
+
+  try {
+    const updatedBooking = await db.booking.update({
+      where: { id: bookingId },
+      data: { status },
+    });
+
+    revalidatePath("/dashboard");
+    revalidatePath("/appointments");
+    
+    return { success: true, booking: updatedBooking };
+  } catch (err) {
+    console.error("updateBookingStatus error:", err);
+    throw new Error("Failed to update booking status");
+  }
+};
 
 export const getInterviewerProfile = async (interviewerId) => {
   try {
@@ -52,11 +70,9 @@ export const bookSlot = async ({ interviewerId, startTime, endTime }) => {
   const user = await currentUser();
   if (!user) throw new Error("Unauthorized");
 
-  // ── Arcjet rate limit ──────────────────────────────────────────────────────
   const req = await request();
   const rateLimitError = await checkRateLimit(bookingLimiter, req, user.id);
   if (rateLimitError) throw new Error(rateLimitError);
-  // ──────────────────────────────────────────────────────────────────────────
 
   const [dbUser, interviewer] = await Promise.all([
     db.user.findUnique({ where: { clerkUserId: user.id } }),
@@ -73,7 +89,6 @@ export const bookSlot = async ({ interviewerId, startTime, endTime }) => {
   if (dbUser.credits < credits)
     throw new Error("Insufficient credits. Please upgrade your plan.");
 
-  // Check slot isn't already taken
   const conflict = await db.booking.findFirst({
     where: {
       interviewerId,
@@ -85,7 +100,6 @@ export const bookSlot = async ({ interviewerId, startTime, endTime }) => {
   if (conflict)
     throw new Error("This slot was just booked. Please pick another.");
 
-  // ── Create Stream call ─────────────────────────────────────────────────────
   let streamCallId;
   try {
     const streamClient = new StreamClient(
@@ -125,10 +139,9 @@ export const bookSlot = async ({ interviewerId, startTime, endTime }) => {
           recording: { mode: "available", quality: "1080p" },
           screensharing: {
             enabled: true,
-            // target_resolution: { width: 1920, height: 1080 },
           },
           transcription: {
-            mode: "auto-on", // starts when first user joins, stops when all leave
+            mode: "auto-on",
           },
         },
       },
