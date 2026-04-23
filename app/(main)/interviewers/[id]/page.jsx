@@ -104,7 +104,7 @@ export default async function InterviewerProfilePage({ params }) {
           {interviewer.bio && (
             <div className="bg-[#0f0f11] border border-white/10 rounded-2xl p-8 flex flex-col gap-5">
               <SectionLabel>About</SectionLabel>
-              <p className="text-base text-stone-300 font-light leading-relaxed">
+              <p className="text-base text-stone-300 font-medium leading-relaxed">
                 {interviewer.bio}
               </p>
             </div>
@@ -114,7 +114,7 @@ export default async function InterviewerProfilePage({ params }) {
             <div className="bg-[#0f0f11] border border-white/10 rounded-2xl p-8 flex flex-col gap-5">
               <div>
                 <SectionLabel>Specialties</SectionLabel>
-                <p className="text-sm text-stone-500 font-light mt-1">
+                <p className="text-sm text-stone-500 font-medium mt-1">
                   Interview categories this expert covers.
                 </p>
               </div>
@@ -134,7 +134,7 @@ export default async function InterviewerProfilePage({ params }) {
           <div className="bg-[#0f0f11] border border-white/10 rounded-2xl p-8 flex flex-col gap-6">
             <div>
               <SectionLabel>What to expect</SectionLabel>
-              <p className="text-sm text-stone-500 font-light mt-1">
+              <p className="text-sm text-stone-500 font-medium mt-1">
                 Every session on Mokt includes the following.
               </p>
             </div>
@@ -148,7 +148,7 @@ export default async function InterviewerProfilePage({ params }) {
                     <p className="text-sm font-medium text-stone-200">
                       {title}
                     </p>
-                    <p className="text-xs text-stone-500 font-light leading-relaxed">
+                    <p className="text-xs text-stone-500 font-medium leading-relaxed">
                       {desc}
                     </p>
                   </div>

@@ -115,7 +115,7 @@ export default function SlotPicker({
               <h2 className="font-serif text-xl tracking-tight">
                 <GrayTitle>Book a session</GrayTitle>
               </h2>
-              <p className="text-xs text-stone-500 font-light mt-1">
+              <p className="text-xs text-stone-500 font-medium mt-1">
                 Select a date and available time slot.
               </p>
             </div>
