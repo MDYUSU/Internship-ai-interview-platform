@@ -135,7 +135,7 @@ export default async function InterviewerProfilePage({ params }) {
             <div>
               <SectionLabel>What to expect</SectionLabel>
               <p className="text-sm text-stone-500 font-light mt-1">
-                Every session on Prept includes the following.
+                Every session on Mokt includes the following.
               </p>
             </div>
             <ul className="flex flex-col gap-5">

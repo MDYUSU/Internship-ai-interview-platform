@@ -75,7 +75,7 @@ useEffect(() => {
           <h1 className="font-serif text-5xl leading-tight tracking-tighter mt-1">
             <GrayTitle>How will you be</GrayTitle>
             <br />
-            <GoldTitle>using Prept?</GoldTitle>
+            <GoldTitle>using Mokt?</GoldTitle>
           </h1>
           <p className="text-sm text-stone-500 font-light mt-4 leading-relaxed">
             This helps us personalise your experience.
