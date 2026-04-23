@@ -22,7 +22,7 @@ export default function AppointmentsSection({ appointments }) {
         <h2 className="font-serif text-xl tracking-tight">
           <GrayTitle>Appointments</GrayTitle>
         </h2>
-        <p className="text-xs text-stone-500 font-light mt-1">
+        <p className="text-xs text-stone-500 font-medium mt-1">
           All your scheduled and past sessions.
         </p>
       </div>

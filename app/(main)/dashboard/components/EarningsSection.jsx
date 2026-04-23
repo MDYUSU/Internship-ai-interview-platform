@@ -118,7 +118,7 @@ export default function EarningsSection({ stats, history }) {
             </p>
             <p className="text-xs text-stone-600">{stat.unit}</p>
 
-            <p className="text-xs text-stone-500">
+            <p className="text-xs font-medium text-white/80">
               {stat.label}{" "}
               {stat.dollarValue !== undefined
                 ? `($${stat?.dollarValue?.toFixed(2)})`
@@ -134,7 +134,7 @@ export default function EarningsSection({ stats, history }) {
           <h2 className="font-serif text-xl tracking-tight">
             <GrayTitle>Withdraw earnings</GrayTitle>
           </h2>
-          <p className="text-xs text-stone-500 font-light mt-1">
+          <p className="text-xs text-stone-500 font-medium mt-1">
             20% platform fee applies. Processed within 2–3 business days.
           </p>
         </div>
@@ -151,7 +151,7 @@ export default function EarningsSection({ stats, history }) {
       {/* Withdrawal history */}
       {history?.length > 0 && (
         <div className="bg-[#0f0f11] border border-white/10 rounded-2xl p-8 flex flex-col gap-5">
-          <p className="text-xs font-semibold text-stone-500 tracking-widest uppercase">
+          <p className="text-xs font-semibold text-white/10 tracking-widest uppercase">
             Withdrawal history
           </p>
           <div className="flex flex-col gap-3">

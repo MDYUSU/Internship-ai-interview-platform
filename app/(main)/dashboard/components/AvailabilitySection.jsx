@@ -68,8 +68,8 @@ export default function AvailabilitySection({ initial }) {
           <h2 className="font-serif text-xl tracking-tight">
             <GrayTitle>Daily availability window</GrayTitle>
           </h2>
-          <p className="text-xs text-stone-500 font-light mt-1">
-            Interviewees can book within this window every day.
+          <p className="text-xs text-stone-500 font-medium mt-1">
+            Candidates can book within this window every day.
           </p>
         </div>
 
@@ -116,7 +116,7 @@ export default function AvailabilitySection({ initial }) {
           >
             {duration} window
           </Badge>
-          <span className="text-xs text-stone-600">
+          <span className="text-xs text-white/10">
             Interviewees see this as your open booking range
           </span>
         </div>

@@ -76,7 +76,7 @@ export function AppointmentCard({ booking, mode, isPast = false }) {
                   {person.company}
                 </p>
               ) : (
-                <p className="text-xs text-stone-600 truncate">
+                <p className="text-xs text-stone-400 truncate">
                   {person?.email}
                 </p>
               )}
@@ -147,10 +147,10 @@ export function AppointmentCard({ booking, mode, isPast = false }) {
 
         {feedback?.summary && (
           <div className="rounded-xl border border-white/8 bg-[#141417] px-4 py-3 flex flex-col gap-1.5">
-            <p className="text-[10px] font-semibold text-stone-600 tracking-widest uppercase">
+            <p className="text-[10px] font-bold text-white/10 tracking-widest uppercase">
               AI Feedback
             </p>
-            <p className="text-xs text-stone-400 font-light leading-relaxed line-clamp-2">
+            <p className="text-xs text-stone-400 font-medium leading-relaxed line-clamp-2">
               {feedback.summary}
             </p>
           </div>
