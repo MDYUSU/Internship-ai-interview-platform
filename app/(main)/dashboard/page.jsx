@@ -39,12 +39,16 @@ export default async function InterviewerDashboardPage() {
         gold={dbUser.name?.split(" ")[0] ?? "Interviewer"}
         description={
           dbUser.title && dbUser.company
-            ? `${dbUser.title} · ${dbUser.company}`
+            ? (
+                <div className="text-sm font-medium text-white/80">
+                  {`${dbUser.title} · ${dbUser.company}`}
+                </div>
+              )
             : undefined
         }
         right={
           <div>
-            <p className="text-xs text-stone-600">Credit balance</p>
+            <p className="text-xs text-white/60">Credit balance</p>
             <p className="font-serif text-3xl leading-none bg-linear-to-br from-amber-300 to-amber-500 bg-clip-text text-transparent text-right">
               {stats?.creditBalance ?? 0}
             </p>
