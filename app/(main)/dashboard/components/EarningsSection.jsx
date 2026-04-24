@@ -151,7 +151,7 @@ export default function EarningsSection({ stats, history }) {
       {/* Withdrawal history */}
       {history?.length > 0 && (
         <div className="bg-[#0f0f11] border border-white/10 rounded-2xl p-8 flex flex-col gap-5">
-          <p className="text-xs font-semibold text-white/10 tracking-widest uppercase">
+          <p className="text-xs font-bold text-stone-400 tracking-widest uppercase">
             Withdrawal history
           </p>
           <div className="flex flex-col gap-3">
