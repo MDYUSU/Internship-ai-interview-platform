@@ -1,6 +1,107 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+
+// Stream Video
+import {
+  StreamVideoClient,
+  StreamVideo,
+  StreamCall,
+} from "@stream-io/video-react-sdk";
+import "@stream-io/video-react-sdk/dist/css/styles.css";
+import "stream-chat-react/dist/css/v2/index.css";
+
+import { Loader2 } from "lucide-react";
+import CallUI from "./CallUI";
+
+export default function CallRoom({
+  callId,
+  token,
+  apiKey,
+  currentUser,
+  booking,
+  isInterviewer,
+}) {
+  const router = useRouter();
+  const [videoClient, setVideoClient] = useState(null);
+  const [call, setCall] = useState(null);
+  const clientRef = useRef(null);
+  const joinedRef = useRef(false);
+
+  useEffect(() => {
+    // Guard against React StrictMode double-invoke in development
+    if (joinedRef.current) return;
+    joinedRef.current = true;
+
+    const client = new StreamVideoClient({
+      apiKey,
+      user: {
+        id: currentUser.id,
+        name: currentUser.name,
+        image: currentUser.imageUrl,
+      },
+      token,
+    });
+
+    const callInstance = client.call("default", callId);
+
+    callInstance
+      .join({ create: false })
+      .then(() => {
+        clientRef.current = client;
+        setVideoClient(client);
+        setCall(callInstance);
+      })
+      .catch(console.error);
+
+    return () => {
+      callInstance.leave().catch(() => {});
+      client.disconnectUser().catch(() => {});
+      clientRef.current = null;
+      joinedRef.current = false; // reset so hot reload works
+    };
+  }, [
+    apiKey,
+    callId,
+    currentUser.id,
+    currentUser.imageUrl,
+    currentUser.name,
+    token,
+  ]);
+
+  const handleLeave = useCallback(() => {
+    router.push(isInterviewer ? "/dashboard" : "/appointments");
+  }, [isInterviewer, router]);
+
+  if (!videoClient || !call) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0b] flex flex-col items-center justify-center gap-3">
+        <Loader2 size={28} className="text-amber-400 animate-spin" />
+        <p className="text-stone-500 text-sm font-light">Connecting to call…</p>
+      </div>
+    );
+  }
+
+  return (
+    <StreamVideo client={videoClient}>
+      <StreamCall call={call}>
+        <CallUI
+          callId={callId}
+          isInterviewer={isInterviewer}
+          booking={booking}
+          onLeave={handleLeave}
+          apiKey={apiKey}
+          token={token}
+          currentUser={currentUser}
+        />
+      </StreamCall>
+    </StreamVideo>
+  );
+}
+
+// ─── Call UI (inside StreamCall context) ─────────────────────────────────────
+
 import { generateAndSaveFeedback } from "@/actions/call";
 
 // Stream Video
@@ -12,7 +113,6 @@ import {
   CallingState,
   CallControls,
 } from "@stream-io/video-react-sdk";
-import "@stream-io/video-react-sdk/dist/css/styles.css";
 
 // Stream Chat
 import {
@@ -23,15 +123,12 @@ import {
   Window,
   useCreateChatClient,
 } from "stream-chat-react";
-import "stream-chat-react/dist/css/v2/index.css";
 
 import { Badge } from "@/components/ui/badge";
-import { MessageSquare, Sparkles, Loader2 } from "lucide-react";
+import { MessageSquare, Sparkles, Loader2, X } from "lucide-react";
 import AIQuestionsPanel from "./AIQuestions";
 
-// ─── Call UI (inside StreamCall context) ─────────────────────────────────────
-
-export default function CallUI({
+export function CallUI({
   callId,
   isInterviewer,
   booking,
@@ -46,6 +143,7 @@ export default function CallUI({
 
   const [activeTab, setActiveTab] = useState("chat");
   const [isEndingCall, setIsEndingCall] = useState(false);
+  const [showMobileChat, setShowMobileChat] = useState(false); // New Mobile Toggle State
 
   // ── Chat client — same token works for both Video + Chat SDKs ──
   const chatClient = useCreateChatClient({
@@ -153,7 +251,9 @@ export default function CallUI({
       </div>
 
       {/* Body: video + side panel */}
-      <div className="flex flex-1 min-h-0">
+      {/* Added relative positioning here for the mobile chat overlay */}
+      <div className="relative flex flex-1 min-h-0">
+        
         {/* ── LEFT: Video ── */}
         <div className="flex flex-col flex-1 min-w-0">
           <StreamTheme>
@@ -163,7 +263,23 @@ export default function CallUI({
         </div>
 
         {/* ── RIGHT: Chat / AI panel ── */}
-        <div className="w-85 shrink-0 flex flex-col border-l border-white/8 bg-[#0a0a0b]">
+        <div 
+          className={`
+            ${showMobileChat ? 'flex' : 'hidden'} 
+            md:flex 
+            absolute inset-0 z-50 
+            md:relative md:w-85 md:z-auto 
+            shrink-0 flex-col border-l border-white/8 bg-[#0a0a0b]
+          `}
+        >
+          {/* Mobile-only close header */}
+          <div className="md:hidden flex items-center justify-between p-3 border-b border-white/8 bg-black shrink-0">
+            <span className="text-white text-sm font-medium">Chat & Tools</span>
+            <button onClick={() => setShowMobileChat(false)} className="p-1 text-stone-400 hover:text-white transition-colors">
+              <X size={20} />
+            </button>
+          </div>
+
           {/* Tab switcher */}
           <div className="flex border-b border-white/8 shrink-0">
             <button
@@ -220,6 +336,17 @@ export default function CallUI({
             )}
           </div>
         </div>
+
+        {/* ── Mobile Floating Action Button ── */}
+        {!showMobileChat && (
+          <button
+            onClick={() => setShowMobileChat(true)}
+            className="md:hidden absolute bottom-20 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-amber-500 shadow-lg shadow-black/50 text-black hover:bg-amber-400 transition-colors"
+          >
+            <MessageSquare size={24} />
+          </button>
+        )}
+
       </div>
     </div>
   );
